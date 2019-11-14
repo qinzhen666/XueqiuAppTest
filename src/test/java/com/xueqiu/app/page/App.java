@@ -38,7 +38,7 @@ public class App  extends BasePage{
     }
 
     public static StockPage toStocks(){
-        click(byText(""));
+        click(By.xpath("//*[contains(@resource-id, 'tab_name') and @text='自选']"));
         return new StockPage();
     }
 }

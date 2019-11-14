@@ -1,16 +1,20 @@
 package com.xueqiu.app.page;
 
+import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.touch.offset.PointOption;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class BasePage {
 
-    public static AndroidDriver driver;
+    public static AndroidDriver<WebElement> driver;
 
     public static WebElement findElement(By by) {
         //todo:递归更好
@@ -20,6 +24,15 @@ public class BasePage {
         } catch (Exception e) {
             handleAlertByPageSource();
             return findElement(by); //最后调用自身完成递归，防止多弹框同时出现造成定位失败
+        }
+    }
+
+    public static List<WebElement> findElements(By by){
+        try {
+            return driver.findElements(by);
+        }catch (Exception e){
+            handleAlertByPageSource();
+            return findElements(by);
         }
     }
 
@@ -62,17 +75,29 @@ public class BasePage {
         String pageSource = driver.getPageSource();//可以得到一个文本字符串，也可以理解为当前页面的xml
         //黑名单
         String adBox = "//*[@resource-id='com.xueqiu.android:id/ib_close']";
+        String gesturePromptBox = "//*[@text='com.xueqiu.android:id/snb_tip_text']";
 
         //将标记和定位符存入map
         HashMap<String,By> map = new HashMap<>();
         map.put(adBox,By.id("ib_close"));
+        map.put(gesturePromptBox,By.id("snb_tip_text"));
+
+        //临时修改隐式等待时间，防止查找黑名单中元素过久
+        driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
 
         //遍历map，判断黑名单弹框元素是否存在于当前pageSource，存在即点击处理
         map.entrySet().forEach(entry ->{
             if (pageSource.contains(entry.getKey())){
-                driver.findElement(entry.getValue()).click();
+                if (entry.getKey().equals("//*[@text='com.xueqiu.android:id/snb_tip_text']")){
+                    Dimension size = driver.manage().window().getSize();
+                    new TouchAction<>(driver).tap(PointOption.point(size.width/2,size.height/2));
+                }else {
+                    driver.findElement(entry.getValue()).click();
+                }
             }
         });
+        //判断完成后将隐式等待时间恢复
+        driver.manage().timeouts().implicitlyWait(8,TimeUnit.SECONDS);
     }
 
 
