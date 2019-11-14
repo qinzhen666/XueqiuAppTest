@@ -16,20 +16,21 @@ public class StockPage extends BasePage{
     }
 
     public List<String> getAllStocks(){
+        handleAlertByPageSource();
+
         List<String> list = new ArrayList<>();
         findElements(By.id("portfolio_stockName")).forEach(element -> {
            list.add(element.getText());
        });
+        System.out.println(list);
         return list;
     }
 
     public StockPage addDefaultStocks() {
         if (getAllStocks().size() >= 1){
             deleteAll();
-        }else {
-            click(By.id("add_to_portfolio_stock"));
         }
-
+        click(By.id("add_to_portfolio_stock"));
         return this;
     }
 }

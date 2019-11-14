@@ -17,23 +17,21 @@ public class BasePage {
     public static AndroidDriver<WebElement> driver;
 
     public static WebElement findElement(By by) {
-        //todo:递归更好
+        //fixed:递归更好
         //todo:定位的元素为动态变化位置的
+        //todo:解决找不到弹框后死循环问题
         try {
+            System.out.println(by);
             return driver.findElement(by);
         } catch (Exception e) {
+            System.out.println("进入弹框处理");
             handleAlertByPageSource();
             return findElement(by); //最后调用自身完成递归，防止多弹框同时出现造成定位失败
         }
     }
 
     public static List<WebElement> findElements(By by){
-        try {
             return driver.findElements(by);
-        }catch (Exception e){
-            handleAlertByPageSource();
-            return findElements(by);
-        }
     }
 
     public static void click(By by){
@@ -71,11 +69,11 @@ public class BasePage {
     }
 
     //很多弹框的话，最好的是直接定位到到底哪个弹框在界面上，元素的判断使用xpath
-    private static void handleAlertByPageSource(){
+    public static void handleAlertByPageSource(){
         String pageSource = driver.getPageSource();//可以得到一个文本字符串，也可以理解为当前页面的xml
         //黑名单
-        String adBox = "//*[@resource-id='com.xueqiu.android:id/ib_close']";
-        String gesturePromptBox = "//*[@text='com.xueqiu.android:id/snb_tip_text']";
+        String adBox = "com.xueqiu.android:id/ib_close";
+        String gesturePromptBox = "com.xueqiu.android:id/snb_tip_text";
 
         //将标记和定位符存入map
         HashMap<String,By> map = new HashMap<>();
@@ -88,9 +86,13 @@ public class BasePage {
         //遍历map，判断黑名单弹框元素是否存在于当前pageSource，存在即点击处理
         map.entrySet().forEach(entry ->{
             if (pageSource.contains(entry.getKey())){
-                if (entry.getKey().equals("//*[@text='com.xueqiu.android:id/snb_tip_text']")){
+                if (entry.getKey().equals("com.xueqiu.android:id/snb_tip_text")){
+                    System.out.println("gesturePromptBox found");
                     Dimension size = driver.manage().window().getSize();
-                    new TouchAction<>(driver).tap(PointOption.point(size.width/2,size.height/2));
+                    /*try {
+                        if (driver.findElements(entry.getValue()))
+                    }*/
+                    new TouchAction<>(driver).tap(PointOption.point(size.width/2,size.height/2)).perform();
                 }else {
                     driver.findElement(entry.getValue()).click();
                 }
