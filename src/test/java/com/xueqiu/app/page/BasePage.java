@@ -17,7 +17,7 @@ public class BasePage {
     public static AndroidDriver<WebElement> driver;
 
     public static WebElement findElement(By by) {
-        //fixed:递归更好
+        //todo:递归更好
         //todo:定位的元素为动态变化位置的
         //todo:解决找不到弹框后死循环问题
         try {
@@ -26,8 +26,8 @@ public class BasePage {
         } catch (Exception e) {
             System.out.println("进入弹框处理");
             handleAlertByPageSource();
-            return findElement(by); //最后调用自身完成递归，防止多弹框同时出现造成定位失败
-        }
+                return driver.findElement(by); //最后调用自身完成递归，防止多弹框同时出现造成定位失败
+            }
     }
 
     public static List<WebElement> findElements(By by){
@@ -36,6 +36,10 @@ public class BasePage {
 
     public static void click(By by){
         findElement(by).click();
+    }
+
+    public static void sendKeys(By by,String sendContext){
+        findElement(by).sendKeys(sendContext);
     }
 
     public static By byText(String text){
@@ -70,15 +74,19 @@ public class BasePage {
 
     //很多弹框的话，最好的是直接定位到到底哪个弹框在界面上，元素的判断使用xpath
     public static void handleAlertByPageSource(){
+        //todo:动态弹框的处理
+
         String pageSource = driver.getPageSource();//可以得到一个文本字符串，也可以理解为当前页面的xml
         //黑名单
         String adBox = "com.xueqiu.android:id/ib_close";
         String gesturePromptBox = "com.xueqiu.android:id/snb_tip_text";
+        String evaluateBox = "com.xueqiu.android:id/md_buttonDefaultNegative";
 
         //将标记和定位符存入map
         HashMap<String,By> map = new HashMap<>();
         map.put(adBox,By.id("ib_close"));
         map.put(gesturePromptBox,By.id("snb_tip_text"));
+        map.put(evaluateBox,By.id("md_buttonDefaultNegative"));
 
         //临时修改隐式等待时间，防止查找黑名单中元素过久
         driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
@@ -99,7 +107,7 @@ public class BasePage {
             }
         });
         //判断完成后将隐式等待时间恢复
-        driver.manage().timeouts().implicitlyWait(8,TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(5,TimeUnit.SECONDS);
     }
 
 

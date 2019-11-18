@@ -9,6 +9,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
 
 public class TestStock {
 
@@ -24,5 +25,13 @@ public class TestStock {
     void addDefaultSelectedStocks(){
         List<String> allStocks = stockPage.addDefaultStocks().getAllStocks();
         assertThat(allStocks.size(),greaterThanOrEqualTo(6));
+    }
+
+    @Test
+    void addOptionalStocks(){
+        String stockName = "格力电器";
+        String expected = "格力电器";
+        List<String> allStocks = stockPage.addOptionalStocks(stockName).getAllStocks();
+        assertThat(allStocks,hasItem(expected));
     }
 }
