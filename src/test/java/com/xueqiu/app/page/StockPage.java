@@ -48,13 +48,8 @@ public class StockPage extends BasePage{
         sendKeys(searchInput,stockName);
         click(searchInput);
         click(stockNameChose);
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        new WebDriverWait(driver,30)
-                .until(ExpectedConditions.visibilityOfElementLocated(addOptional));
+        /*new WebDriverWait(driver,30)
+                .until(ExpectedConditions.visibilityOfElementLocated(addOptional));*/
         click(addOptional);
         click(cancel);
         return this;

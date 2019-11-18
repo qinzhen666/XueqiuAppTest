@@ -35,13 +35,13 @@ public class App  extends BasePage{
         //对首页进入使用显示等待，利用搜索控件的出现来判断是否进入了首页，这样不影响其他元素隐式等待的时间，也解决了首页初始化加载时间过长的问题
         //但是这样有个情况不能解决：加入加载完成后有弹框出现，可能就一直无法定位到首页元素，但是实际上已经加载完成
         /*new WebDriverWait(driver,30)
-                .until(ExpectedConditions.visibilityOfElementLocated(By.id("home_search")));*/
+                .until(ExpectedConditions.visibilityOfElementLocated(By.id("user_profile_container")));*/
 
         //对上述显示等待进一步处理，利用pageSource进行判断，连同一些加载完成后会出现的弹框一起判断是否初始化完成进入了主页面
         new WebDriverWait(driver,30)
                 .until(x ->{
                     String xml = driver.getPageSource();
-                    Boolean checkResult = xml.contains("home_search") || xml.contains("com.xueqiu.android:id/ib_close");
+                    Boolean checkResult = xml.contains("user_profile_container") || xml.contains("com.xueqiu.android:id/ib_close");
                     System.out.println("主页元素查找的结果是:" + checkResult);
                     return checkResult;
                 });

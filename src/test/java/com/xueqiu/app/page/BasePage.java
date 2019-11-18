@@ -14,19 +14,26 @@ import java.util.concurrent.TimeUnit;
 
 public class BasePage {
 
+    private static int i = 1;
+
     public static AndroidDriver<WebElement> driver;
 
     public static WebElement findElement(By by) {
-        //todo:递归更好
+        //fixed:递归更好
         //todo:定位的元素为动态变化位置的
-        //todo:解决找不到弹框后死循环问题
+        //fixed:解决找不到弹框后死循环问题
         try {
             System.out.println(by);
             return driver.findElement(by);
         } catch (Exception e) {
-            System.out.println("进入弹框处理");
+            if (i > 2){   //设置最多递归两次
+                i = 1;
+                return driver.findElement(by);
+            }
+            System.out.println("进入弹框处理第"+i+"次");
             handleAlertByPageSource();
-                return driver.findElement(by); //最后调用自身完成递归，防止多弹框同时出现造成定位失败
+            i++;
+            return findElement(by); //最后调用自身完成递归，防止多弹框同时出现造成定位失败
             }
     }
 
@@ -36,10 +43,16 @@ public class BasePage {
 
     public static void click(By by){
         findElement(by).click();
+        if (i != 1){
+            i = 1;
+        }
     }
 
     public static void sendKeys(By by,String sendContext){
         findElement(by).sendKeys(sendContext);
+        if (i != 1){
+            i = 1;
+        }
     }
 
     public static By byText(String text){
