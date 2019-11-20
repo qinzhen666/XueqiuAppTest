@@ -53,9 +53,30 @@ public class Driver {
         //System.out.println( appiumdriver.findElementByClassName("android.widget.Toast").getText());  不可用
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         start();
         testToast();
-    }
+    }*/
+
+
+        private static int sum(int[] arr, int z) {
+
+            if (z == arr.length) {
+                return 0;
+            }
+
+            int x = sum(arr, z + 1);
+
+            int res = arr[z] + x;
+
+            return res;
+        }
+
+
+        public static void main(String[] args) {
+            int arr[] = {1, 2};
+            sum(arr, 0);
+        }
+
 
 }
