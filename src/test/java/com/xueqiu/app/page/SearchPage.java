@@ -13,17 +13,21 @@ public class SearchPage extends BasePage{
         HashMap<String,Object> data = new HashMap<>();
         data.put("sendText",sendText);
         setParams(data);
-        parseSteps("search"); //todo:可通过反射来读取方法名
+        parseSteps(); //todo:可通过反射来读取方法名
         /*findElement(inputBox).sendKeys(inputText);
         findElement(By.id("name")).click(); */ //默认点击找到的第一个
         return this;
     }
 
     public Double getCurrentPrice(){
-        return Double.valueOf(findElement(By.id("current_price")).getText());
+        parseSteps();
+        return Double.valueOf(getData().get("price").toString());
+//        return Double.valueOf(findElement(By.id("current_price")).getText());
     }
 
-    public static void cancel(){
-        findElement(By.id("action_close")).click();
+    public App cancel(){
+//        findElement(By.id("action_close")).click();
+        parseSteps();
+        return new App();
     }
 }

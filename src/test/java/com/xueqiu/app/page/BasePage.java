@@ -25,6 +25,11 @@ public class BasePage {
 
     public static AndroidDriver<WebElement> driver;
     private static HashMap<String,Object> params = new HashMap<>();
+    private static HashMap<String,Object> data = new HashMap<>();
+
+    public static HashMap<String, Object> getData() {
+        return data;
+    }
 
     public HashMap<String, Object> getParams() {
         return params;
@@ -33,7 +38,6 @@ public class BasePage {
     public void setParams(HashMap<String, Object> params) {
         this.params = params;
     }
-
 
 
     public static WebElement findElement(By by) {
@@ -154,10 +158,15 @@ public class BasePage {
         try {
             HashMap<String, TestCaseSteps> yamlSteps = mapper.readValue(this.getClass().getResourceAsStream(path), typeRef);
             parseStepsFromYaml(yamlSteps.get(method));
-
         }catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void parseSteps(){
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        System.out.println("当前执行的方法步骤是："+ method);
+        parseSteps(method);
     }
 
     public static void parseSteps(String method,String path){
@@ -209,7 +218,8 @@ public class BasePage {
                     element.sendKeys(send);
                 }else if (get != null){
 //                   findElement(by).getAttribute(get);
-                    element.getAttribute(get);
+                    String attribute = element.getAttribute(get);
+                    data.put(step.get("dump"),attribute);
                 }else {
 //                   click(by);
                     element.click();

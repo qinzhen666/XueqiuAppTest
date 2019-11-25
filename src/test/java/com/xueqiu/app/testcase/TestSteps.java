@@ -9,6 +9,7 @@ import com.xueqiu.app.page.TestCaseSteps;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,5 +39,14 @@ public class TestSteps {
         App.start();
         BasePage basePage = new BasePage();
         basePage.parseSteps("search");
+    }
+
+    @Test
+    void testMethod(){
+        Arrays.stream(Thread.currentThread().getStackTrace()).forEach(stack ->{
+            System.out.println(stack.getClassName()+" : "+stack.getMethodName());
+        });
+
+        System.out.println("===="+Thread.currentThread().getStackTrace()[1].getMethodName());
     }
 }
