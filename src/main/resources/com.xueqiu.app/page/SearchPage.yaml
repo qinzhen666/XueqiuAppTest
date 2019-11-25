@@ -1,0 +1,22 @@
+
+
+#search:
+##  - { id: xxx, action: click }    # 这是一个数组的一种写法
+#  - id: xxx  #默认不写action就是click
+#  - id: aaa
+#    send: ddd
+#  - xpath: //*[@text='aaa']
+#  - xpath: //*[@text='bbb']
+#    send: zzz
+#  - id: qqq
+#    get: resource-id   #通过id来获取元素的属性resource-id
+#
+#cancel:
+#  - dd
+
+search:
+  steps:
+    - id: search_input_text
+#      send: pdd
+      send: $sendText
+    - id: name

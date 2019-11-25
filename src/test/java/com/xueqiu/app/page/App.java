@@ -41,7 +41,9 @@ public class App  extends BasePage{
         new WebDriverWait(driver,30)
                 .until(x ->{
                     String xml = driver.getPageSource();
-                    Boolean checkResult = xml.contains("user_profile_container") || xml.contains("com.xueqiu.android:id/ib_close");
+                    Boolean checkResult = xml.contains("user_profile_container")
+                            || xml.contains("com.xueqiu.android:id/ib_close")
+                            || xml.contains("com.xueqiu.android:id/image_cancel");
                     System.out.println("主页元素查找的结果是:" + checkResult);
                     return checkResult;
                 });
@@ -49,12 +51,14 @@ public class App  extends BasePage{
     }
 
     public static SearchPage toSearch() {
-        click(By.id("home_search"));
+        parseSteps("toSearch","/com.xueqiu.app/page/app.yaml");
+//        click(By.id("home_search"));
         return new SearchPage();
     }
 
     public static StockPage toStocks(){
-        click(By.xpath("//*[contains(@resource-id, 'tab_name') and @text='自选']"));
+        parseSteps("toStocks","/com.xueqiu.app/page/app.yaml");
+//        click(By.xpath("//*[contains(@resource-id, 'tab_name') and @text='自选']"));
         return new StockPage();
     }
 }

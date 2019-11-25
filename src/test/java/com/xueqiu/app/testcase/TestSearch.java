@@ -3,11 +3,9 @@ package com.xueqiu.app.testcase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.xueqiu.app.page.App;
+import com.xueqiu.app.page.BasePage;
 import com.xueqiu.app.page.SearchPage;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -56,8 +54,11 @@ public class TestSearch {
         return Stream.of(list.get(0),list.get(1),list.get(2));
     }
 
+
+
+
     @AfterAll
-    static void cancel(){
+     static void cancel(){
         searchPage.cancel();
     }
 }

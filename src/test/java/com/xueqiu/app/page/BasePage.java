@@ -1,15 +1,22 @@
 package com.xueqiu.app.page;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.appium.java_client.MobileBy;
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.touch.offset.PointOption;
+import jdk.nashorn.internal.objects.NativeJava;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class BasePage {
@@ -17,6 +24,17 @@ public class BasePage {
     private static int i = 1;
 
     public static AndroidDriver<WebElement> driver;
+    private static HashMap<String,Object> params = new HashMap<>();
+
+    public HashMap<String, Object> getParams() {
+        return params;
+    }
+
+    public void setParams(HashMap<String, Object> params) {
+        this.params = params;
+    }
+
+
 
     public static WebElement findElement(By by) {
         //fixed:递归更好
@@ -91,7 +109,8 @@ public class BasePage {
 
         String pageSource = driver.getPageSource();//可以得到一个文本字符串，也可以理解为当前页面的xml
         //黑名单
-        String adBox = "com.xueqiu.android:id/ib_close";
+        String adBox = "com.xueqiu.android:id/ib_close";  //广告
+        String updateBox = "com.xueqiu.android:id/image_cancel"; //升级弹框
         String gesturePromptBox = "com.xueqiu.android:id/snb_tip_text";
         String evaluateBox = "com.xueqiu.android:id/md_buttonDefaultNegative";
 
@@ -100,6 +119,7 @@ public class BasePage {
         map.put(adBox,By.id("ib_close"));
         map.put(gesturePromptBox,By.id("snb_tip_text"));
         map.put(evaluateBox,By.id("md_buttonDefaultNegative"));
+        map.put(updateBox,By.id("image_cancel"));
 
         //临时修改隐式等待时间，防止查找黑名单中元素过久
         driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
@@ -122,6 +142,81 @@ public class BasePage {
         //判断完成后将隐式等待时间恢复
         driver.manage().timeouts().implicitlyWait(5,TimeUnit.SECONDS);
     }
+
+
+    //解析步骤
+    public void parseSteps(String method) {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        String path = "/com.xueqiu.app" + this.getClass().getCanonicalName().split("app")[1].replace(".", "/") + ".yaml";
+        System.out.println(path);
+        TypeReference<HashMap<String, TestCaseSteps>> typeRef = new TypeReference<HashMap<String, TestCaseSteps>>() {
+        };
+        try {
+            HashMap<String, TestCaseSteps> yamlSteps = mapper.readValue(this.getClass().getResourceAsStream(path), typeRef);
+            parseStepsFromYaml(yamlSteps.get(method));
+
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void parseSteps(String method,String path){
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        System.out.println(path);
+        TypeReference<HashMap<String, TestCaseSteps>> typeRef = new TypeReference<HashMap<String, TestCaseSteps>>() {
+        };
+        try {
+            HashMap<String, TestCaseSteps> yamlSteps = mapper.readValue(BasePage.class.getResourceAsStream(path), typeRef);
+            parseStepsFromYaml(yamlSteps.get(method));
+
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void parseStepsFromYaml(TestCaseSteps steps){
+        //todo: 多可可能定位，多个系统Android、IOS，多个版本
+            steps.getSteps().forEach(step ->{
+                WebElement element = null;
+//                By by = null;
+                String id =  step.get("id");
+                if (id != null){
+//                   by = By.id(id);
+                    element = findElement(By.id(id));
+                }
+
+                String xpath = step.get("xpath");
+                if (xpath != null){
+//                   by = By.id(xpath);
+                    element = findElement(By.id(xpath));
+                }
+
+                String aid = step.get("aid");
+                if (aid != null){
+//                   by = MobileBy.AccessibilityId(aid);
+                    element = findElement(MobileBy.AccessibilityId(aid));
+                }
+
+                String send = step.get("send");
+
+                String get = step.get("get");
+                if (send != null){
+                    for (Map.Entry<String, Object> kv : params.entrySet()) {
+                        send = send.replace("$" + kv.getKey() ,kv.getValue().toString());
+                    }
+//                   sendKeys(by,send);
+                    element.sendKeys(send);
+                }else if (get != null){
+//                   findElement(by).getAttribute(get);
+                    element.getAttribute(get);
+                }else {
+//                   click(by);
+                    element.click();
+                }
+            });
+        }
+
 
 
 
