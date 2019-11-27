@@ -11,9 +11,16 @@ import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 public class App  extends BasePage{
+    private static App app;
+    public static App getInstance(){
+        if (app == null){
+            app = new App();
+        }
+        return app;
+    }
 
 
-    public static void start() {
+    public void start() {
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setCapability("platformName","android");
         desiredCapabilities.setCapability("deviceName","aaa");
@@ -23,7 +30,7 @@ public class App  extends BasePage{
         desiredCapabilities.setCapability("resetKeyboard",true);
         desiredCapabilities.setCapability("autoGrantPermissions",true);
         //真机测试时往往不需要每次清理数据和缓存
-        desiredCapabilities.setCapability("noReset",false);
+        desiredCapabilities.setCapability("noReset",true);
 
         try {
             driver = new AndroidDriver(new URL("http://127.0.0.1:4723/wd/hub"),desiredCapabilities);
@@ -50,13 +57,13 @@ public class App  extends BasePage{
 
     }
 
-    public static SearchPage toSearch() {
+    public SearchPage toSearch() {
         parseSteps("toSearch","/com.xueqiu.app/page/app.yaml");
 //        click(By.id("home_search"));
         return new SearchPage();
     }
 
-    public static StockPage toStocks(){
+    public StockPage toStocks(){
         parseSteps("toStocks","/com.xueqiu.app/page/app.yaml");
 //        click(By.xpath("//*[contains(@resource-id, 'tab_name') and @text='自选']"));
         return new StockPage();

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class TestCaseSteps {
+public class PageObjectMethod {
     public List<HashMap<String, String>> getSteps() {
         return steps;
     }

@@ -1,7 +1,20 @@
-toSearch:
-  steps:
-    - id: home_search
+methods:
+ toSearch:
+   steps:
+     - id: home_search
 
-toStocks:
-  steps:
-    - xpath: //*[contains(@resource-id, 'tab_name') and @text='自选']
+ toStocks:
+   steps:
+     - xpath: //*[contains(@resource-id, 'tab_name') and @text='自选']
+
+
+elements:
+  home_search:
+    element:
+      - id: search_input_text
+        os: android
+      - id: search_edit
+        os: ios
+      - xpath: //*[@text='aaa']
+        os: android
+        version: 1.1

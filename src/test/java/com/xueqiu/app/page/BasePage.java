@@ -1,13 +1,11 @@
 package com.xueqiu.app.page;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.appium.java_client.MobileBy;
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.touch.offset.PointOption;
-import jdk.nashorn.internal.objects.NativeJava;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
@@ -16,7 +14,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class BasePage {
@@ -24,17 +21,21 @@ public class BasePage {
     private static int i = 1;
 
     public static AndroidDriver<WebElement> driver;
-    private static HashMap<String,Object> params = new HashMap<>();
-    private static HashMap<String,Object> data = new HashMap<>();
+    private PageObjectModel model=new PageObjectModel();
 
-    public static HashMap<String, Object> getData() {
-        return data;
+    private static HashMap<String,Object> params = new HashMap<>();
+    private static HashMap<String,Object> result = new HashMap<>();
+
+    //测试步骤结果读取
+    public static HashMap<String, Object> getResult() {
+        return result;
     }
 
     public HashMap<String, Object> getParams() {
         return params;
     }
 
+    //测试步骤参数化
     public void setParams(HashMap<String, Object> params) {
         this.params = params;
     }
@@ -42,7 +43,7 @@ public class BasePage {
 
     public static WebElement findElement(By by) {
         //fixed:递归更好
-        //todo:定位的元素为动态变化位置的
+        //todo:定位的元素为动态变化位置的 ： 连续定位两次元素，元素不变的时候确认元素
         //fixed:解决找不到弹框后死循环问题
         try {
             System.out.println(by);
@@ -153,11 +154,13 @@ public class BasePage {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         String path = "/com.xueqiu.app" + this.getClass().getCanonicalName().split("app")[1].replace(".", "/") + ".yaml";
         System.out.println(path);
-        TypeReference<HashMap<String, TestCaseSteps>> typeRef = new TypeReference<HashMap<String, TestCaseSteps>>() {
-        };
+//        TypeReference<HashMap<String, PageObjectMethod>> typeRef = new TypeReference<HashMap<String, PageObjectMethod>>() {
+//        };
         try {
-            HashMap<String, TestCaseSteps> yamlSteps = mapper.readValue(this.getClass().getResourceAsStream(path), typeRef);
-            parseStepsFromYaml(yamlSteps.get(method));
+            /*HashMap<String, PageObjectMethod> yamlSteps = mapper.readValue(this.getClass().getResourceAsStream(path), typeRef);
+            parseStepsFromYaml(yamlSteps.get(method));*/
+            PageObjectModel model = mapper.readValue(this.getClass().getResourceAsStream(path),PageObjectModel.class);
+            parseStepsFromYaml(model.methods.get(method));
         }catch (IOException e) {
             e.printStackTrace();
         }
@@ -169,22 +172,24 @@ public class BasePage {
         parseSteps(method);
     }
 
-    public static void parseSteps(String method,String path){
+    public void parseSteps(String method,String path){
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        System.out.println(path);
-        TypeReference<HashMap<String, TestCaseSteps>> typeRef = new TypeReference<HashMap<String, TestCaseSteps>>() {
-        };
+        System.out.println("执行的method是："+ method+"  方法配置文件路径：" +path);
+        /*TypeReference<HashMap<String, PageObjectMethod>> typeRef = new TypeReference<HashMap<String, PageObjectMethod>>() {
+        };*/
         try {
-            HashMap<String, TestCaseSteps> yamlSteps = mapper.readValue(BasePage.class.getResourceAsStream(path), typeRef);
-            parseStepsFromYaml(yamlSteps.get(method));
-
+            /*HashMap<String, PageObjectMethod> yamlSteps = mapper.readValue(BasePage.class.getResourceAsStream(path), typeRef);
+            parseStepsFromYaml(yamlSteps.get(method));*/
+            System.out.println("开始解析yaml");
+            PageObjectModel model = mapper.readValue(BasePage.class.getResourceAsStream(path),PageObjectModel.class);
+            System.out.println("model==="+model);
+            parseStepsFromYaml(model.methods.get(method));
         }catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
-    private static void parseStepsFromYaml(TestCaseSteps steps){
+    private void parseStepsFromYaml(PageObjectMethod steps){
         //todo: 多可可能定位，多个系统Android、IOS，多个版本
             steps.getSteps().forEach(step ->{
                 WebElement element = null;
@@ -193,34 +198,29 @@ public class BasePage {
                 if (id != null){
 //                   by = By.id(id);
                     element = findElement(By.id(id));
-                }
-
-                String xpath = step.get("xpath");
-                if (xpath != null){
+                }else if (step.get("xpath") != null){
 //                   by = By.id(xpath);
-                    element = findElement(By.id(xpath));
-                }
-
-                String aid = step.get("aid");
-                if (aid != null){
+                    element = findElement(By.id(step.get("xpath")));
+                }else if (step.get("aid") != null){
 //                   by = MobileBy.AccessibilityId(aid);
-                    element = findElement(MobileBy.AccessibilityId(aid));
+                    element = findElement(MobileBy.AccessibilityId(step.get("aid")));
+                }else if (step.get("element") != null) {
+                    //todo: element中各种情况的完善，跨平台支持
+                    element = findElement(model.elements.get(step.get("element")).getLocator());
                 }
-
-                String send = step.get("send");
-
-                String get = step.get("get");
-                if (send != null){
-                    for (Map.Entry<String, Object> kv : params.entrySet()) {
-                        send = send.replace("$" + kv.getKey() ,kv.getValue().toString());
-                    }
+                if (step.get("send") != null){
+                    String send = step.get("send").replace("$sendText",params.get("sendText").toString());
+                    /*for (Map.Entry<String, Object> kv : params.entrySet()) {
+                        send = step.get("send").replace("$" + kv.getKey() ,kv.getValue().toString());
+                    }*/
 //                   sendKeys(by,send);
                     element.sendKeys(send);
-                }else if (get != null){
+                }else if (step.get("get") != null){
 //                   findElement(by).getAttribute(get);
-                    String attribute = element.getAttribute(get);
-                    data.put(step.get("dump"),attribute);
-                }else {
+                    String attribute = element.getAttribute(step.get("get"));
+                    result.put(step.get("dump"),attribute);
+                }
+                else {
 //                   click(by);
                     element.click();
                 }

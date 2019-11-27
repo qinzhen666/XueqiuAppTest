@@ -25,8 +25,8 @@ public class TestSearch {
 
     @BeforeAll
     static void beforeAll(){
-        App.start();
-        searchPage = App.toSearch();
+        App.getInstance().start();
+        searchPage = App.getInstance().toSearch();
     }
 
 
@@ -53,7 +53,6 @@ public class TestSearch {
         }
         return Stream.of(list.get(0),list.get(1),list.get(2));
     }
-
 
 
 

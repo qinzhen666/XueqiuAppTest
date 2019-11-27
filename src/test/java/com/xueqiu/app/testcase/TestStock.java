@@ -17,8 +17,8 @@ public class TestStock {
 
     @BeforeAll
     static void beforeAll(){
-        App.start();
-        stockPage = App.toStocks();
+        App.getInstance().start();
+        stockPage = App.getInstance().toStocks();
     }
 
     @Test
