@@ -10,6 +10,7 @@ import io.appium.java_client.touch.offset.PointOption;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Dimension;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,13 +45,26 @@ public class TestSteps {
         basePage.parseSteps("search");
     }
 
-    @Test
+//    @Test
     void testMethod(){
         Arrays.stream(Thread.currentThread().getStackTrace()).forEach(stack ->{
-            System.out.println(stack.getClassName()+" : "+stack.getMethodName());
+//            System.out.println(stack.getClassName()+" : "+stack.getMethodName());
+            System.out.println(stack.getMethodName());
         });
 
-        System.out.println("===="+Thread.currentThread().getStackTrace()[1].getMethodName());
+        System.out.println("当前执行的方法是："+Thread.currentThread().getStackTrace()[2].getMethodName());
+    }
+
+    @Test
+    void getMethodName(){
+        testMethod();
+    }
+
+    @Test
+    void getPath(){
+        System.out.println(this.getClass().getCanonicalName());
+        String path = "/com.xueqiu.app" + this.getClass().getCanonicalName().split("app")[1].replace(".", "/") + ".yaml";
+        System.out.println(path);
     }
 
     @Test
@@ -96,5 +110,15 @@ public class TestSteps {
             System.out.println("scrollTest " + i +"次");
             Thread.sleep(1000);
         }
+    }
+
+    public Config config = new Config();
+    @Test
+    void configYamlTest() throws IOException {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        TestSteps value = mapper.readValue(this.getClass().getResourceAsStream("/demo2.yaml"), this.getClass());
+        value.config.testdata.keySet().forEach(key->{
+            System.out.println(key + ":" + value.config.testdata.get(key));
+        });
     }
 }

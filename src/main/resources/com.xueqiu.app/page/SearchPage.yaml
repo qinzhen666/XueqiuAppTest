@@ -42,8 +42,10 @@ elements:
     element:
       - id: search_input_text
         os: android
+        version: 1.1
       - id: search_edit
         os: ios
+        version: 1.1
       - xpath: //*[@text='aaa']
         os: android
         version: 1.1
